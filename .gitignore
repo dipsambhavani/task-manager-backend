@@ -1,0 +1,6 @@
+node_modules/
+images/
+*.hbs
+*.html
+*.ejs
+*.json
