@@ -4,6 +4,7 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 
 const auth = require("./router/auth");
+const task = require("./router/task");
 
 const app = express();
 
@@ -17,6 +18,7 @@ app.get("/health", (req, res) => {
 });
 
 app.use(auth.router);
+app.use(task.router);
 
 app.use((error, req, res, next) => {
     console.log(error);
