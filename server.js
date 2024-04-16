@@ -1,7 +1,14 @@
 const express = require("express");
-const sequelize = require("./utils/database");
 const bodyParser = require("body-parser");
 const cors = require("cors");
+
+const sequelize = require("./utils/database");
+const User = require('./model/user');
+const Task = require('./model/task');
+
+User.belongsToMany(Task, { through: 'user_task'});
+Task.belongsToMany(User, { through: 'user_task'});
+
 
 const auth = require("./router/auth");
 const task = require("./router/task");
