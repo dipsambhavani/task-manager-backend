@@ -9,7 +9,7 @@ const jwtSecret = "skdnguidfg";
 exports.getUsers = async (req, res, next) => {
   try {
     const users = await User.findAll({
-      attributes: ['email'],
+      attributes: ['id', 'email'],
     });
     res.status(200).json({
       users: users,
