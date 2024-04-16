@@ -6,11 +6,26 @@ const User = require("../model/user");
 
 const jwtSecret = "skdnguidfg";
 
+exports.getUsers = async (req, res, next) => {
+  try {
+    const users = await User.findAll({
+      attributes: ['email'],
+    });
+    res.status(200).json({
+      users: users,
+    });
+  } catch (err) {
+    if (!err.statusCode) {
+      err.statusCode = 500;
+    }
+    next(err);
+  }
+};
+
 exports.postSignup = async (req, res, next) => {
   const email = req.body.email;
   const password = req.body.password;
   try {
-
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       const error = new Error("Validation failed!!!");
@@ -33,9 +48,8 @@ exports.postSignup = async (req, res, next) => {
       jwtSecret,
       { expiresIn: "1d" }
     );
-    await res.json({
+    await res.status(200).json({
       message: "Signed up !!!",
-      statusCode: 200,
       accessToken: token,
     });
   } catch (err) {
@@ -58,9 +72,8 @@ exports.postLogin = async (req, res, next) => {
     }
     const isEqual = await bcrypt.compare(password, user.password);
     if (!isEqual) {
-      return res.json({
+      return res.status(403).json({
         message: "Wrong Password!!!",
-        statusCode: 403,
       });
     }
     const token = jwt.sign(
@@ -71,9 +84,8 @@ exports.postLogin = async (req, res, next) => {
       jwtSecret,
       { expiresIn: "1d" }
     );
-    await res.json({
+    await res.status(200).json({
       message: "ok",
-      statusCode: 200,
       accessToken: token,
     });
   } catch (err) {
