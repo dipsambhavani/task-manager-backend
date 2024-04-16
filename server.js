@@ -21,7 +21,7 @@ app.use(auth.router);
 app.use(task.router);
 
 app.use((error, req, res, next) => {
-    console.log(error);
+    console.log("in the middel were :" , error);
     const status = error.statusCode || 500;
     const message = error.message;
     const data = error.data;
@@ -36,5 +36,5 @@ sequelize
     });
   })
   .catch((err) => {
-    console.log(err);
+    console.log("in the server call :" ,err);
   });

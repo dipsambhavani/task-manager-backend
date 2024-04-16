@@ -1,4 +1,5 @@
 const jwt = require("jsonwebtoken");
+const { validationResult } = require("express-validator");
 const bcrypt = require("bcrypt");
 
 const User = require("../model/user");
@@ -6,10 +7,18 @@ const User = require("../model/user");
 const jwtSecret = "skdnguidfg";
 
 exports.postSignup = async (req, res, next) => {
-  console.log(req.body);
   const email = req.body.email;
   const password = req.body.password;
   try {
+
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      const error = new Error("Validation failed!!!");
+      error.statusCode = 422;
+      error.data = errors.array();
+      throw error;
+    }
+
     const hashedPw = await bcrypt.hash(password, 12);
     const user = User.build({
       email: email,

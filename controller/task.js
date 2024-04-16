@@ -1,7 +1,15 @@
 const Task = require("../model/task");
 
 exports.getTasks = async (req, res, next) => {
-  const tasks = await Task.findAll();
+    const page = req.query.page || 1;
+    let limit = 3;
+    let offset = 0 + (page - 1) * limit;
+  const result = await Task.findAndCountAll({
+    offset: offset,
+    limit: limit
+  });
+
+  const tasks = result.rows;
   if (!tasks) {
     return res.json({
       message: "No Task Found!!!",
@@ -9,7 +17,9 @@ exports.getTasks = async (req, res, next) => {
     });
   }
   return res.status(200).json({
+    message: "These are the items",
     tasks: tasks,
+    count: result.count
   });
 };
 
