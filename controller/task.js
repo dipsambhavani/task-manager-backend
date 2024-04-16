@@ -8,7 +8,13 @@ exports.getTasks = async (req, res, next) => {
 
   try {
     const result = await Task.findAndCountAll({
-      include: User,
+      include: {
+        model: User,
+        attributes: [ 'id', 'email'],
+        through: {
+          attributes: [],
+        }
+      },
       offset: offset,
       limit: limit,
     });
@@ -22,7 +28,7 @@ exports.getTasks = async (req, res, next) => {
     return res.status(200).json({
       message: "These are the items",
       tasks: tasks,
-      count: result.count,
+      count: await Task.count(),
     });
   } catch (err) {
     if (!err.statusCode) {
@@ -60,6 +66,7 @@ exports.postTask = async (req, res, next) => {
       const user = await User.findByPk(userId);
       users.push(user);
     }
+    
     const resultTask = await task.save();
     const result = await resultTask.addUsers(users);
     return res.status(200).json({
