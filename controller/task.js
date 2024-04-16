@@ -1,3 +1,4 @@
+const { validationResult } = require("express-validator");
 const Task = require("../model/task");
 const User = require("../model/user");
 
@@ -43,14 +44,22 @@ exports.postTask = async (req, res, next) => {
   const title = req.body.title;
   const description = req.body.description;
   const priority = req.body.priority;
-  let startDate = req.body.startDate;
-  let endDate = req.body.endDate;
+  let startDate = req.body.startDate || null;
+  let endDate = req.body.endDate || null;
   const status = req.body.status;
   const assignedPerson = req.body.assignedPerson;
   startDate = new Date(startDate);
   endDate = new Date(endDate);
   
   try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      const error = new Error("Validation failed!!!");
+      error.statusCode = 422;
+      error.data = errors.array();
+      throw error;
+    }
+
     const task = Task.build({
       title: title,
       description: description,
@@ -64,6 +73,11 @@ exports.postTask = async (req, res, next) => {
     for (let i = 0; i < assignedPerson.length; i++) {
       const userId = assignedPerson[i].id;
       const user = await User.findByPk(userId);
+      if(!user) {
+        const error = new Error("The user doesn't exist");
+        error.statusCode = 403;
+        throw error;
+      }
       users.push(user);
     }
     
