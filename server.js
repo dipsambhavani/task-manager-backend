@@ -3,12 +3,11 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 
 const sequelize = require("./utils/database");
-const User = require('./model/user');
-const Task = require('./model/task');
+const User = require("./model/user");
+const Task = require("./model/task");
 
-User.belongsToMany(Task, { through: 'user_task'});
-Task.belongsToMany(User, { through: 'user_task'});
-
+User.belongsToMany(Task, { through: "user_task", onDelete: "CASCADE" });
+Task.belongsToMany(User, { through: "user_task", onDelete: "CASCADE" });
 
 const auth = require("./router/auth");
 const task = require("./router/task");
@@ -24,24 +23,24 @@ app.get("/health", (req, res) => {
   return res.send("Ok");
 });
 
-app.use(auth.router);
-app.use(task.router);
+app.use("/auth", auth.router);
+app.use("/task", task.router);
 
 app.use((error, req, res, next) => {
-    console.log("in the middel were :" , error);
-    const status = error.statusCode || 500;
-    const message = error.message;
-    const data = error.data;
-    res.status(status).json({ message: message, data: data});
-  });
+  console.log("in the middel were :", error);
+  const status = error.statusCode || 500;
+  const message = error.message;
+  const data = error.data;
+  res.status(status).json({ message: message, data: data });
+});
 
 sequelize
-  .sync()
+  .sync({ alter: true })
   .then((result) => {
     app.listen(3000, () => {
       console.log("====> Server is running");
     });
   })
   .catch((err) => {
-    console.log("in the server call :" ,err);
+    console.log("in the server call :", err);
   });

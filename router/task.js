@@ -5,10 +5,10 @@ const { body } = require("express-validator");
 
 const router = express.Router();
 
-router.get("/tasks", taskController.getTasks);
+router.get("/fetch-all", taskController.getTasks);
 
 router.post(
-  "/task",
+  "/create",
   [
     body("title")
       .isAlphanumeric("en-US", { ignore: " " })
@@ -20,13 +20,13 @@ router.post(
       .isIn(["Low", "Medium", "High"])
       .withMessage("Invalid priority !!"),
     body("startDate")
-    .if(body("startDate").notEmpty())
-    .isISO8601("yyyy-mm-dd")
-    .withMessage("Start date must be in the correct format yyyy-mm-dd"),
+      .if(body("startDate").notEmpty())
+      .isISO8601()
+      .withMessage("Invalid date format. Expected yyyy-mm-ddThh:mm:ss+hh:mm"),
     body("endDate")
-    .if(body("startDate").notEmpty())
-      .isISO8601("yyyy-mm-dd")
-      .withMessage("End date must be in the correct format yyyy-mm-dd"),
+      .if(body("startDate").notEmpty())
+      .isISO8601()
+      .withMessage("Invalid date format. Expected yyyy-mm-ddThh:mm:ss+hh:mm"),
     body("status")
       .not()
       .isEmpty()
@@ -34,7 +34,11 @@ router.post(
       .isIn(["To-do", "In-progress", "Done"])
       .withMessage("Invalid status !!"),
   ],
-  taskController.postTask
+  taskController.createTask
 );
+
+router.patch("/update", taskController.updateTask);
+
+router.delete("/delete/:taskId", taskController.deleteTask);
 
 exports.router = router;
