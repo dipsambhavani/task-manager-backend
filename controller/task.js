@@ -148,7 +148,6 @@ exports.updateTask = async (req, res, next) => {
 
     const task = await Task.findByPk(taskId);
 
-
     await task.removeUsers();
     const resultTask = await task.setUsers(users);
     return res.status(200).json({
@@ -163,11 +162,21 @@ exports.updateTask = async (req, res, next) => {
 };
 
 exports.deleteTask = (req, res, next) => {
-  const taskId = req.params.taskId;
-  const result = Task.destroy({where: {
-    id: taskId
-  }});
-  return res.status(200).json({
-    result: result,
-  });
-}
+  try {
+    const taskId = req.params.taskId;
+    console.log(taskId);
+    const result = Task.destroy({
+      where: {
+        id: taskId,
+      },
+    });
+    return res.status(200).json({
+      result: result,
+    });
+  } catch (err) {
+    if (!err.statusCode) {
+      err.statusCode = 500;
+    }
+    next(err);
+  }
+};
