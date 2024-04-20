@@ -5,12 +5,24 @@ const cors = require("cors");
 const sequelize = require("./utils/database");
 const User = require("./model/user");
 const Task = require("./model/task");
+const Project = require("./model/project");
 
+// Associatoin------------------------------------------------------------------------------
 User.belongsToMany(Task, { through: "user_task", onDelete: "CASCADE" });
 Task.belongsToMany(User, { through: "user_task", onDelete: "CASCADE" });
 
+Project.belongsToMany(User, { through: "project_members", onDelete: "CASCADE"});
+User.belongsToMany(Project, { through: "project_members", onDelete: "CASCADE"});
+
+Project.hasMany(Task);
+Task.belongsTo(Project);
+
+
+// Routers-----------------------------------------------------------------------------------
 const auth = require("./router/auth");
 const task = require("./router/task");
+const project = require("./router/project");
+const { FORCE } = require("sequelize/lib/index-hints");
 
 const app = express();
 
@@ -19,12 +31,9 @@ app.use(bodyParser.json());
 
 app.use(cors());
 
-app.get("/health", (req, res) => {
-  return res.send("Ok");
-});
-
 app.use("/auth", auth.router);
 app.use("/task", task.router);
+app.use("/project", project.router);
 
 app.use((error, req, res, next) => {
   console.log("in the middel were :", error);
