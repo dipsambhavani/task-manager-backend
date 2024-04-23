@@ -11,12 +11,20 @@ const Project = require("./model/project");
 User.belongsToMany(Task, { through: "user_task", onDelete: "CASCADE" });
 Task.belongsToMany(User, { through: "user_task", onDelete: "CASCADE" });
 
-Project.belongsToMany(User, { through: "project_members", onDelete: "CASCADE"});
-User.belongsToMany(Project, { through: "project_members", onDelete: "CASCADE"});
+Project.belongsToMany(User, {
+  through: "project_members",
+  onDelete: "CASCADE",
+});
+User.belongsToMany(Project, {
+  through: "project_members",
+  onDelete: "CASCADE",
+});
+
+Project.belongsTo(User, { foreignKey: "owner" });
+User.hasMany(Project, { foreignKey: "owner" });
 
 Project.hasMany(Task);
 Task.belongsTo(Project);
-
 
 // Routers-----------------------------------------------------------------------------------
 const auth = require("./router/auth");
