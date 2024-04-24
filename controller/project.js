@@ -11,8 +11,12 @@ exports.getProjects = async (req, res, next) => {
   const ownerId = req.params.ownerId;
   try {
     const projects = await Project.findAll({
-      where: {
-        owner: ownerId,
+      // where: {
+      //   owner: ownerId,
+      // },
+      include: {
+        model: User,
+        as: "owner",
       },
     });
     return res.status(200).json(projects);
@@ -35,7 +39,7 @@ exports.createProject = async (req, res, next) => {
     const tokenData = await jwt.verify(token, jwtSecret);
     const project = await Project.build({
       title: title,
-      owner: tokenData.id,
+      ownerId: tokenData.id,
       description: description,
       startDate: startDate,
       endDate: endDate,

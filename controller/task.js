@@ -39,7 +39,7 @@ exports.getAllTasks = async (req, res, next) => {
   }
 };
 
-exports.getSingleTasks = async (req, res, next) => {
+exports.getSingleTask = async (req, res, next) => {
   const taskId = req.params.taskId;
   try {
     const task = await Task.findByPk(taskId, {

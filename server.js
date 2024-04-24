@@ -20,8 +20,7 @@ User.belongsToMany(Project, {
   onDelete: "CASCADE",
 });
 
-Project.belongsTo(User, { foreignKey: "owner" });
-User.hasMany(Project, { foreignKey: "owner" });
+Project.belongsTo(User, { as: "owner" });
 
 Project.hasMany(Task);
 Task.belongsTo(Project);
