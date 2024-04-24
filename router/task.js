@@ -6,7 +6,8 @@ const isAuth = require("../middleware/is-auth");
 
 const router = express.Router();
 
-router.get("/fetch-all", isAuth, taskController.getTasks);
+router.get("/all", isAuth, taskController.getAllTasks);
+router.get("/:taskId", isAuth, taskController.getSingleTask);
 
 router.post(
   "/create",
