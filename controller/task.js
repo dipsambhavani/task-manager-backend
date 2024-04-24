@@ -2,7 +2,7 @@ const { validationResult } = require("express-validator");
 const Task = require("../model/task");
 const User = require("../model/user");
 
-exports.getTasks = async (req, res, next) => {
+exports.getAllTasks = async (req, res, next) => {
   const page = req.query.page || 1;
   let limit = req.query.limit || 5;
   let offset = 0 + (page - 1) * limit;
@@ -30,6 +30,32 @@ exports.getTasks = async (req, res, next) => {
       message: "These are the items",
       tasks: tasks,
       count: await Task.count(),
+    });
+  } catch (err) {
+    if (!err.statusCode) {
+      err.statusCode = 500;
+    }
+    next(err);
+  }
+};
+
+exports.getSingleTasks = async (req, res, next) => {
+  const taskId = req.params.taskId;
+  try {
+    const task = await Task.findByPk(taskId, {
+      include: {
+        model: User,
+        attributes: ["id", "email"],
+      },
+    });
+    if (!task) {
+      return res.status(404).json({
+        message: "Task Not Found!!!",
+      });
+    }
+    return res.status(200).json({
+      message: "task found successfully",
+      task: task,
     });
   } catch (err) {
     if (!err.statusCode) {
@@ -148,7 +174,6 @@ exports.updateTask = async (req, res, next) => {
 
     const task = await Task.findByPk(taskId);
 
-
     await task.removeUsers();
     const resultTask = await task.setUsers(users);
     return res.status(200).json({
@@ -163,11 +188,21 @@ exports.updateTask = async (req, res, next) => {
 };
 
 exports.deleteTask = (req, res, next) => {
-  const taskId = req.params.taskId;
-  const result = Task.destroy({where: {
-    id: taskId
-  }});
-  return res.status(200).json({
-    result: result,
-  });
-}
+  try {
+    const taskId = req.params.taskId;
+    console.log(taskId);
+    const result = Task.destroy({
+      where: {
+        id: taskId,
+      },
+    });
+    return res.status(200).json({
+      result: result,
+    });
+  } catch (err) {
+    if (!err.statusCode) {
+      err.statusCode = 500;
+    }
+    next(err);
+  }
+};
