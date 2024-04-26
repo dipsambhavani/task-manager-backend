@@ -3,12 +3,19 @@ const Task = require("../model/task");
 const User = require("../model/user");
 
 exports.getAllTasks = async (req, res, next) => {
-  const page = req.query.page || 1;
-  let limit = req.query.limit || 5;
-  let offset = 0 + (page - 1) * limit;
+  const page = req?.query?.page || 1;
+  const limit = req?.query?.limit || 5;
+  const offset = 0 + (page - 1) * limit;
+  const projectId = req?.query?.projectId;
 
   try {
+    if (!projectId) {
+      return res.status(404).json({
+        message: "No Task Found!!!",
+      });
+    }
     const result = await Task.findAndCountAll({
+      where: { projectId },
       include: {
         model: User,
         attributes: ["id", "email"],
@@ -66,13 +73,14 @@ exports.getSingleTask = async (req, res, next) => {
 };
 
 exports.createTask = async (req, res, next) => {
-  const title = req.body.title;
-  const description = req.body.description;
-  const priority = req.body.priority;
-  const startDate = req.body.startDate ? new Date(req.body.startDate) : null;
-  const endDate = req.body.endDate ? new Date(req.body.endDate) : null;
-  const status = req.body.status;
-  const userIds = req.body.userIds;
+  const title = req?.body?.title;
+  const description = req?.body?.description;
+  const priority = req?.body?.priority;
+  const startDate = req?.body?.startDate ? new Date(req?.body?.startDate) : null;
+  const endDate = req?.body?.endDate ? new Date(req?.body?.endDate) : null;
+  const status = req?.body?.status;
+  const userIds = req?.body?.userIds;
+  const projectId = req?.body?.projectId;
   
   try {
     const errors = validationResult(req);
@@ -83,14 +91,7 @@ exports.createTask = async (req, res, next) => {
       throw error;
     }
 
-    const task = Task.build({
-      title: title,
-      description: description,
-      priority: priority,
-      startDate: startDate,
-      endDate: endDate,
-      status: status,
-    });
+    const task = Task.build({ title, description, priority, startDate, endDate, status, projectId });
 
     const users = [];
     for (let i = 0; i < userIds.length; i++) {
