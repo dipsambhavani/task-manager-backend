@@ -6,11 +6,11 @@ const isAuth = require("../middleware/is-auth");
 
 const router = express.Router();
 
-router.get("/all", isAuth, taskController.getAllTasks);
-router.get("/:taskId", isAuth, taskController.getSingleTask);
+router.get("", isAuth, taskController.getAllTasks);
+router.get("/:id", isAuth, taskController.getSingleTask);
 
 router.post(
-  "/create",
+  "",
   isAuth,
   [
     body("title")
@@ -41,7 +41,7 @@ router.post(
 );
 
 router.patch(
-  "/update",
+  "",
   isAuth,
   [
     body("title")
@@ -71,6 +71,6 @@ router.patch(
   taskController.updateTask
 );
 
-router.delete("/delete/:taskId", isAuth, taskController.deleteTask);
+router.delete("/:id", isAuth, taskController.deleteTask);
 
 exports.router = router;

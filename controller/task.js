@@ -40,9 +40,9 @@ exports.getAllTasks = async (req, res, next) => {
 };
 
 exports.getSingleTask = async (req, res, next) => {
-  const taskId = req.params.taskId;
+  const id = req.params.id;
   try {
-    const task = await Task.findByPk(taskId, {
+    const task = await Task.findByPk(id, {
       include: {
         model: User,
         attributes: ["id", "email"],
@@ -69,13 +69,11 @@ exports.createTask = async (req, res, next) => {
   const title = req.body.title;
   const description = req.body.description;
   const priority = req.body.priority;
-  let startDate = req.body.startDate || null;
-  let endDate = req.body.endDate || null;
+  const startDate = req.body.startDate ? new Date(req.body.startDate) : null;
+  const endDate = req.body.endDate ? new Date(req.body.endDate) : null;
   const status = req.body.status;
-  const assignedPerson = req.body.assignedPerson;
-  startDate = new Date(startDate);
-  endDate = new Date(endDate);
-
+  const userIds = req.body.userIds;
+  
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -95,8 +93,8 @@ exports.createTask = async (req, res, next) => {
     });
 
     const users = [];
-    for (let i = 0; i < assignedPerson.length; i++) {
-      const userId = assignedPerson[i];
+    for (let i = 0; i < userIds.length; i++) {
+      const userId = userIds[i];
       const user = await User.findByPk(userId);
       if (!user) {
         const error = new Error("The person you assigned doesn't exist");
@@ -120,17 +118,16 @@ exports.createTask = async (req, res, next) => {
 };
 
 exports.updateTask = async (req, res, next) => {
-  const taskId = req.body.id;
+  const id = req.body.id;
 
   const title = req.body.title;
   const description = req.body.description;
   const priority = req.body.priority;
-  let startDate = req.body.startDate || null;
-  let endDate = req.body.endDate || null;
+  const startDate = req.body.startDate ? new Date(req.body.startDate) : null;
+  const endDate = req.body.endDate ? new Date(req.body.endDate) : null;
   const status = req.body.status;
-  const assignedPerson = req.body.assignedPerson;
-  startDate = new Date(startDate);
-  endDate = new Date(endDate);
+  const userIds = req.body.userIds;
+
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -140,8 +137,8 @@ exports.updateTask = async (req, res, next) => {
       throw error;
     }
     const users = [];
-    for (let i = 0; i < assignedPerson.length; i++) {
-      const userId = assignedPerson[i];
+    for (let i = 0; i < userIds.length; i++) {
+      const userId = userIds[i];
       const user = await User.findByPk(userId);
       if (!user) {
         const error = new Error("The person you assigned doesn't exist");
@@ -161,7 +158,7 @@ exports.updateTask = async (req, res, next) => {
       },
       {
         where: {
-          id: taskId,
+          id: id,
         },
       }
     );
@@ -172,7 +169,7 @@ exports.updateTask = async (req, res, next) => {
       throw error;
     }
 
-    const task = await Task.findByPk(taskId);
+    const task = await Task.findByPk(id);
 
     await task.removeUsers();
     const resultTask = await task.setUsers(users);
@@ -189,11 +186,10 @@ exports.updateTask = async (req, res, next) => {
 
 exports.deleteTask = (req, res, next) => {
   try {
-    const taskId = req.params.taskId;
-    console.log(taskId);
+    const id = req.params.id;
     const result = Task.destroy({
       where: {
-        id: taskId,
+        id: id,
       },
     });
     return res.status(200).json({

@@ -29,7 +29,6 @@ Task.belongsTo(Project);
 const auth = require("./router/auth");
 const task = require("./router/task");
 const project = require("./router/project");
-const { FORCE } = require("sequelize/lib/index-hints");
 
 const app = express();
 
@@ -52,9 +51,9 @@ app.use((error, req, res, next) => {
 
 sequelize
   .sync({ alter: true })
-  .then((result) => {
+  .then(() => {
     app.listen(3000, () => {
-      console.log("====> Server is running");
+      console.log("===> Server is up & running on http://localhost:3000");
     });
   })
   .catch((err) => {
