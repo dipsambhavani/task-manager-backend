@@ -4,27 +4,48 @@ const { validationResult } = require('express-validator');
 
 const Project = require("../model/project.model");
 const User = require("../model/user.model");
+const sequelize = require("../utils/database");
 
 const jwtSecret = "skdnguidfg";
 
 exports.getProjects = async (req, res, next) => {
   try {
-    const projects = await Project.findAll({
-      include: [
-        {
-          model: User,
-          as: "owner",
-          attributes: ['id', 'email'],
-        },{
-          model: User,
-          attributes: ['id', 'email'],
-          through: {
-            attributes: [],
-          },
-        }
-      ],
-    });
-    return res.status(200).json(projects);
+    const userId = +req?.userId;
+    const response = await sequelize.query(`
+      select 
+        p.*,
+        json_build_object(
+          'id', u1.id,
+          'email', u1.email
+        ) as owner,
+        json_agg(
+          json_build_object(
+            'id', u2.id,
+            'email', u2.email
+          )
+        ) as users
+      from 
+        projects as p
+      left join 
+        project_members as pm on p.id = pm."projectId"
+      left join 
+        users as u1 on p."ownerId" = u1.id
+      left join 
+        users as u2 on pm."userId" = u2.id
+      where 
+        p."ownerId" = ${userId}
+        or p.id in (
+          select 
+            "projectId" 
+          from 
+            project_members
+          where
+            "userId" = ${userId}
+        )
+      group by
+        p.id, u1.id
+    `);
+    return res.status(200).json(response[0]);
   } catch (err) {
     if (!err.statusCode) {
       err.statusCode = 500;
