@@ -1,10 +1,10 @@
 const { validationResult } = require("express-validator");
-const Task = require("../model/task");
-const User = require("../model/user");
+const Task = require("../model/task.model");
+const User = require("../model/user.model");
 
 exports.getAllTasks = async (req, res, next) => {
   const page = req?.query?.page || 1;
-  const limit = req?.query?.limit || 5;
+  const limit = req?.query?.limit || 10;
   const offset = 0 + (page - 1) * limit;
   const projectId = req?.query?.projectId;
 
@@ -16,6 +16,9 @@ exports.getAllTasks = async (req, res, next) => {
     }
     const result = await Task.findAndCountAll({
       where: { projectId },
+      attributes: {
+        exclude: ['createdAt', 'updatedAt']
+      },
       include: {
         model: User,
         attributes: ["id", "email"],
@@ -23,6 +26,7 @@ exports.getAllTasks = async (req, res, next) => {
           attributes: [],
         },
       },
+      order: [["id", 'ASC']],
       // offset: offset,
       // limit: limit,
     });

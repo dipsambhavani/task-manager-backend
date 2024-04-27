@@ -3,9 +3,9 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 
 const sequelize = require("./utils/database");
-const User = require("./model/user");
-const Task = require("./model/task");
-const Project = require("./model/project");
+const User = require("./model/user.model");
+const Task = require("./model/task.model");
+const Project = require("./model/project.model");
 
 // Associatoin------------------------------------------------------------------------------
 User.belongsToMany(Task, { through: "user_task", onDelete: "CASCADE" });
@@ -22,13 +22,13 @@ User.belongsToMany(Project, {
 
 Project.belongsTo(User, { as: "owner" });
 
-Project.hasMany(Task);
+Project.hasMany(Task, { onDelete: "CASCADE" });
 Task.belongsTo(Project);
 
 // Routers-----------------------------------------------------------------------------------
-const auth = require("./router/auth");
-const task = require("./router/task");
-const project = require("./router/project");
+const auth = require("./router/auth.router");
+const task = require("./router/task.router");
+const project = require("./router/project.router");
 
 const app = express();
 

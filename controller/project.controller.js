@@ -2,8 +2,8 @@ const jwt = require("jsonwebtoken");
 
 const { validationResult } = require('express-validator');
 
-const Project = require("../model/project");
-const User = require("../model/user");
+const Project = require("../model/project.model");
+const User = require("../model/user.model");
 
 const jwtSecret = "skdnguidfg";
 
@@ -14,8 +14,13 @@ exports.getProjects = async (req, res, next) => {
         {
           model: User,
           as: "owner",
+          attributes: ['id', 'email'],
         },{
           model: User,
+          attributes: ['id', 'email'],
+          through: {
+            attributes: [],
+          },
         }
       ],
     });

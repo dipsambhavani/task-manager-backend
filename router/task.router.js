@@ -1,8 +1,8 @@
 const express = require("express");
 
-const taskController = require("../controller/task");
+const taskController = require("../controller/task.controller");
 const { body } = require("express-validator");
-const isAuth = require("../middleware/is-auth");
+const isAuth = require("../middleware/auth.middleware");
 
 const router = express.Router();
 
@@ -20,7 +20,7 @@ router.post(
       .not()
       .isEmpty()
       .withMessage("The priority field can't be empty")
-      .isIn(["Low", "Medium", "High"])
+      .isIn([1, 2, 3])
       .withMessage("Invalid priority !!"),
     body("startDate")
       .if(body("startDate").notEmpty())
@@ -51,7 +51,7 @@ router.patch(
       .not()
       .isEmpty()
       .withMessage("The priority field can't be empty")
-      .isIn(["Low", "Medium", "High"])
+      .isIn([1, 2, 3])
       .withMessage("Invalid priority !!"),
     body("startDate")
       .if(body("startDate").notEmpty())
