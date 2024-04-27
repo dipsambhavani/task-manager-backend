@@ -182,3 +182,31 @@ exports.deleteProject = async (req, res, next) => {
     next(err);
   }
 }
+
+exports.getProject = async (req, res, next) => {
+  const id = req.params.id;
+  try {
+    const project = await Project.findByPk(id, {
+      include: [
+        {
+          model: User,
+          as: "owner",
+          attributes: ["id", "email"],
+        },
+        {
+          model: User,
+          attributes: ["id", "email"],
+          through: {
+            attributes: [],
+          },
+        }
+      ],
+    });
+    return res.status(200).json({ project });
+  } catch (err) {
+    if (!err.statusCode) {
+      err.statusCode = 500;
+    }
+    next(err);
+  }
+}

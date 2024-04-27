@@ -10,7 +10,7 @@ const Task = sequelize.define("task", {
     primaryKey: true,
   },
   title: { type: Sequelize.DataTypes.STRING, allowNull: false },
-  description: { type: Sequelize.DataTypes.STRING, allowNull: true },
+  description: { type: Sequelize.DataTypes.TEXT, allowNull: true },
   priority: { type: Sequelize.DataTypes.INTEGER, allowNull: false },
   startDate: { type: Sequelize.DataTypes.DATE, allowNull: true },
   endDate: { type: Sequelize.DataTypes.DATE, allowNull: true },

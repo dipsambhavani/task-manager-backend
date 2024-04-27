@@ -7,6 +7,8 @@ const router = express.Router();
 
 router.get("", isAuth, projectController.getProjects);
 
+router.get("/:id", isAuth, projectController.getProject);
+
 router.post("", isAuth, projectController.createProject);
 
 router.patch("/:id", isAuth, projectController.updateProject);
