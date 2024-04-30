@@ -7,6 +7,8 @@ exports.getAllTasks = async (req, res, next) => {
   const limit = req?.query?.limit || 10;
   const offset = 0 + (page - 1) * limit;
   const projectId = req?.query?.projectId;
+  const status = req?.query?.status;
+  const isMyTasks = req?.query?.myTasks;
 
   try {
     if (!projectId) {
@@ -14,14 +16,22 @@ exports.getAllTasks = async (req, res, next) => {
         message: "No Task Found!!!",
       });
     }
+    let where = { projectId };
+    if (status) {
+      where = { 
+        ...where,
+        status
+      };
+    }
     const result = await Task.findAndCountAll({
-      where: { projectId },
+      where,
       attributes: {
         exclude: ['createdAt', 'updatedAt']
       },
       include: {
         model: User,
         attributes: ["id", "email"],
+        ...(!!isMyTasks && { where: { id: req.userId } }),
         through: {
           attributes: [],
         },
