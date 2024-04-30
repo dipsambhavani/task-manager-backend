@@ -1,14 +1,24 @@
 const { validationResult } = require("express-validator");
-const Task = require("../model/task");
-const User = require("../model/user");
+const Task = require("../model/task.model");
+const User = require("../model/user.model");
 
 exports.getAllTasks = async (req, res, next) => {
-  const page = req.query.page || 1;
-  let limit = req.query.limit || 5;
-  let offset = 0 + (page - 1) * limit;
+  const page = req?.query?.page || 1;
+  const limit = req?.query?.limit || 10;
+  const offset = 0 + (page - 1) * limit;
+  const projectId = req?.query?.projectId;
 
   try {
+    if (!projectId) {
+      return res.status(404).json({
+        message: "No Task Found!!!",
+      });
+    }
     const result = await Task.findAndCountAll({
+      where: { projectId },
+      attributes: {
+        exclude: ['createdAt', 'updatedAt']
+      },
       include: {
         model: User,
         attributes: ["id", "email"],
@@ -16,6 +26,7 @@ exports.getAllTasks = async (req, res, next) => {
           attributes: [],
         },
       },
+      order: [["id", 'ASC']],
       // offset: offset,
       // limit: limit,
     });
@@ -39,10 +50,10 @@ exports.getAllTasks = async (req, res, next) => {
   }
 };
 
-exports.getSingleTasks = async (req, res, next) => {
-  const taskId = req.params.taskId;
+exports.getSingleTask = async (req, res, next) => {
+  const id = req.params.id;
   try {
-    const task = await Task.findByPk(taskId, {
+    const task = await Task.findByPk(id, {
       include: {
         model: User,
         attributes: ["id", "email"],
@@ -66,16 +77,15 @@ exports.getSingleTasks = async (req, res, next) => {
 };
 
 exports.createTask = async (req, res, next) => {
-  const title = req.body.title;
-  const description = req.body.description;
-  const priority = req.body.priority;
-  let startDate = req.body.startDate || null;
-  let endDate = req.body.endDate || null;
-  const status = req.body.status;
-  const assignedPerson = req.body.assignedPerson;
-  startDate = new Date(startDate);
-  endDate = new Date(endDate);
-
+  const title = req?.body?.title;
+  const description = req?.body?.description;
+  const priority = req?.body?.priority;
+  const startDate = req?.body?.startDate ? new Date(req?.body?.startDate) : null;
+  const endDate = req?.body?.endDate ? new Date(req?.body?.endDate) : null;
+  const status = req?.body?.status;
+  const userIds = req?.body?.userIds;
+  const projectId = req?.body?.projectId;
+  
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -85,18 +95,11 @@ exports.createTask = async (req, res, next) => {
       throw error;
     }
 
-    const task = Task.build({
-      title: title,
-      description: description,
-      priority: priority,
-      startDate: startDate,
-      endDate: endDate,
-      status: status,
-    });
+    const task = Task.build({ title, description, priority, startDate, endDate, status, projectId });
 
     const users = [];
-    for (let i = 0; i < assignedPerson.length; i++) {
-      const userId = assignedPerson[i];
+    for (let i = 0; i < userIds.length; i++) {
+      const userId = userIds[i];
       const user = await User.findByPk(userId);
       if (!user) {
         const error = new Error("The person you assigned doesn't exist");
@@ -120,17 +123,16 @@ exports.createTask = async (req, res, next) => {
 };
 
 exports.updateTask = async (req, res, next) => {
-  const taskId = req.body.id;
+  const id = req.body.id;
 
   const title = req.body.title;
   const description = req.body.description;
   const priority = req.body.priority;
-  let startDate = req.body.startDate || null;
-  let endDate = req.body.endDate || null;
+  const startDate = req.body.startDate ? new Date(req.body.startDate) : null;
+  const endDate = req.body.endDate ? new Date(req.body.endDate) : null;
   const status = req.body.status;
-  const assignedPerson = req.body.assignedPerson;
-  startDate = new Date(startDate);
-  endDate = new Date(endDate);
+  const userIds = req.body.userIds;
+
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -140,8 +142,8 @@ exports.updateTask = async (req, res, next) => {
       throw error;
     }
     const users = [];
-    for (let i = 0; i < assignedPerson.length; i++) {
-      const userId = assignedPerson[i];
+    for (let i = 0; i < userIds.length; i++) {
+      const userId = userIds[i];
       const user = await User.findByPk(userId);
       if (!user) {
         const error = new Error("The person you assigned doesn't exist");
@@ -161,7 +163,7 @@ exports.updateTask = async (req, res, next) => {
       },
       {
         where: {
-          id: taskId,
+          id: id,
         },
       }
     );
@@ -172,7 +174,7 @@ exports.updateTask = async (req, res, next) => {
       throw error;
     }
 
-    const task = await Task.findByPk(taskId);
+    const task = await Task.findByPk(id);
 
     await task.removeUsers();
     const resultTask = await task.setUsers(users);
@@ -189,11 +191,10 @@ exports.updateTask = async (req, res, next) => {
 
 exports.deleteTask = (req, res, next) => {
   try {
-    const taskId = req.params.taskId;
-    console.log(taskId);
+    const id = req.params.id;
     const result = Task.destroy({
       where: {
-        id: taskId,
+        id: id,
       },
     });
     return res.status(200).json({

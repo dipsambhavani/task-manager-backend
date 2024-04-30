@@ -2,7 +2,7 @@ const jwt = require("jsonwebtoken");
 const { validationResult } = require("express-validator");
 const bcrypt = require("bcrypt");
 
-const User = require("../model/user");
+const User = require("../model/user.model");
 
 const jwtSecret = "skdnguidfg";
 
@@ -64,7 +64,7 @@ exports.postLogin = async (req, res, next) => {
   const email = req.body.email;
   const password = req.body.password;
   try {
-    const user = await User.findOne({ where: { email: email } });
+    const user = await User.findOne({ where: { email } });
     if (!user) {
       const error = new Error("user not found !!!");
       error.statusCode = 403;

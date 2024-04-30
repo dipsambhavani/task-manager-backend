@@ -2,9 +2,9 @@ const express = require("express");
 
 const { body } = require("express-validator");
 
-const authController = require("../controller/auth");
+const authController = require("../controller/auth.controller");
 
-const User = require("../model/user");
+const User = require("../model/user.model");
 
 const router = express.Router();
 
@@ -29,7 +29,7 @@ router.post(
     body("password")
       .trim()
       .isString()
-      .matches(/^(?=.\d)(?=.[a-z])(?=.[A-Z])(?=.[@])[0-9a-zA-Z@]{8,20}$/gm, "i")
+      .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,20}$/)
       .withMessage(
         "Password should be combination of one uppercase , one lower case, one special char, one digit and min 8 , max 20 char long"
       ),

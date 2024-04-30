@@ -1,16 +1,16 @@
 const express = require("express");
 
-const taskController = require("../controller/task");
+const taskController = require("../controller/task.controller");
 const { body } = require("express-validator");
-const isAuth = require("../middleware/is-auth");
+const isAuth = require("../middleware/auth.middleware");
 
 const router = express.Router();
 
-router.get("/all", isAuth, taskController.getAllTasks);
-router.get("/:taskId", isAuth, taskController.getSingleTask);
+router.get("", isAuth, taskController.getAllTasks);
+router.get("/:id", isAuth, taskController.getSingleTask);
 
 router.post(
-  "/create",
+  "",
   isAuth,
   [
     body("title")
@@ -20,7 +20,7 @@ router.post(
       .not()
       .isEmpty()
       .withMessage("The priority field can't be empty")
-      .isIn(["Low", "Medium", "High"])
+      .isIn([1, 2, 3])
       .withMessage("Invalid priority !!"),
     body("startDate")
       .if(body("startDate").notEmpty())
@@ -41,7 +41,7 @@ router.post(
 );
 
 router.patch(
-  "/update",
+  "",
   isAuth,
   [
     body("title")
@@ -51,7 +51,7 @@ router.patch(
       .not()
       .isEmpty()
       .withMessage("The priority field can't be empty")
-      .isIn(["Low", "Medium", "High"])
+      .isIn([1, 2, 3])
       .withMessage("Invalid priority !!"),
     body("startDate")
       .if(body("startDate").notEmpty())
@@ -71,6 +71,6 @@ router.patch(
   taskController.updateTask
 );
 
-router.delete("/delete/:taskId", isAuth, taskController.deleteTask);
+router.delete("/:id", isAuth, taskController.deleteTask);
 
 exports.router = router;
