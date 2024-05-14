@@ -25,9 +25,16 @@ router.post(
     body("startDate")
       .if(body("startDate").notEmpty())
       .isISO8601()
-      .withMessage("Invalid date format. Expected yyyy-mm-ddThh:mm:ss+hh:mm"),
+      .withMessage("Invalid date format. Expected yyyy-mm-ddThh:mm:ss+hh:mm")
+      .custom((startDate, { req }) => {
+
+          if (new Date(startDate).getTime() >= new Date(req.body.endDate).getTime()) {
+            throw new Error('start date must be before end date');
+        }
+        return true
+      }),
     body("endDate")
-      .if(body("startDate").notEmpty())
+      .if(body("endDate").notEmpty())
       .isISO8601()
       .withMessage("Invalid date format. Expected yyyy-mm-ddThh:mm:ss+hh:mm"),
     body("status")
