@@ -14,8 +14,9 @@ router.post(
   isAuth,
   [
     body("title")
-      .isAlphanumeric("en-US", { ignore: " " })
-      .withMessage("title must be alphanumaric only"),
+    .not()
+    .isEmpty()
+      .withMessage("Title can't be empty"),
     body("priority")
       .not()
       .isEmpty()
@@ -52,8 +53,9 @@ router.patch(
   isAuth,
   [
     body("title")
-      .isAlphanumeric("en-US", { ignore: " " })
-      .withMessage("title must be alphanumaric only"),
+      .not()
+      .isEmpty()
+      .withMessage("Title can't be empty"),
     body("priority")
       .not()
       .isEmpty()
